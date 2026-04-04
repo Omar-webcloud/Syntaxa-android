@@ -34,11 +34,37 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   void _checkAnswer() {
     final userInput = _answerController.text.trim().toLowerCase();
-    final correctAnswer = _currentQuestion!['answer'].toString().trim().toLowerCase();
+    final questionStr = _currentQuestion!['question'].toString();
+    final fullAnswerStr = _currentQuestion!['answer'].toString();
+
+    // Extract the answer by taking the word(s) inside the brackets, e.g. "go" from "She ___ (go) to school."
+    // OR if we don't have brackets we map against the full exact answer.
+    // However, looking at the dataset, the exact answer is often provided without parentheses.
+    // The easiest way to find the missing word is to extract it using the fact we usually have a target word.
+    
+    // Instead of complex diffing, since user wants "one word" or "missing word" matches:
+    // Let's use simple contains or substring checking against the sanitized full answer missing word.
+    // For "fill in the blanks", we can isolate the word by splitting the answer and finding what's not in the question.
+
+    final qWords = questionStr.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').split(' ');
+    final aWords = fullAnswerStr.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').split(' ');
+
+    // Find words that are in the answer but NOT in the question (the filled-in word)
+    final missingWords = aWords.where((word) => !qWords.contains(word)).toList();
+    final expectedWordPart = missingWords.join(' '); // Could be "goes" or "am going"
+    
     String sanitize(String s) => s.replaceAll(RegExp(r'[^\w\s]'), '');
+    
     setState(() {
       _isAnswerChecked = true;
-      _isCorrect = sanitize(userInput) == sanitize(correctAnswer);
+      // If our heuristic found specific missing words, check against that. 
+      // Otherwise, fallback to full sentence exact check just in case.
+      if (expectedWordPart.isNotEmpty) {
+        _isCorrect = sanitize(userInput) == sanitize(expectedWordPart);
+      } else {
+        // Fallback if missing word logic fails
+        _isCorrect = sanitize(userInput) == sanitize(fullAnswerStr);
+      }
     });
   }
 

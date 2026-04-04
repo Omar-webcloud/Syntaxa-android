@@ -72,15 +72,39 @@ class _QuizScreenState extends State<QuizScreen> {
     });
   }
 
-  List<String> _getOptions(String question) {
+  List<String> _getOptions(String question, String answer) {
+    // 1. First, check if there are explicit options grouped in parentheses like (is/are)
     final regex = RegExp(r'\(([^)]+)\)');
     final match = regex.firstMatch(question);
+    
+    List<String> foundOptions = [];
     if (match != null) {
-      return match.group(1)!.split('/');
+      foundOptions = match.group(1)!.split('/').map((s) => s.trim()).toList();
     }
-    return ['yes', 'no'];
+    
+    // 2. Ensure the correct answer is always safely in the pool
+    if (!foundOptions.contains(answer)) {
+      foundOptions.add(answer);
+    }
+    
+    // 3. To guarantee EXACTLY 4 options, pad it with logical distractors.
+    final genericDistractors = ['is', 'are', 'am', 'was', 'were', 'has', 'have', 'had', 'do', 'does', 'did', 'to', 'for', 'of', 'in', 'on', 'at', 'by', 'with', 'goes', 'went', 'gone', 'playing', 'played', 'play'];
+    
+    // Remove correct answer or existing options from distractors, shuffle, and add until we hit 4.
+    genericDistractors.shuffle();
+    for (String dist in genericDistractors) {
+      if (foundOptions.length >= 4) break;
+      if (!foundOptions.contains(dist) && dist != answer) {
+        foundOptions.add(dist);
+      }
+    }
+    
+    // Only take exactly 4 options safely, and shuffle them so answer isn't predictable.
+    final finalOptions = foundOptions.take(4).toList();
+    finalOptions.shuffle();
+    return finalOptions;
   }
-
+  
   String _cleanQuestion(String question) {
     final regex = RegExp(r'\s*\([^)]+\)');
     String cleanStr = question.replaceAll(regex, '').trim();
@@ -93,7 +117,7 @@ class _QuizScreenState extends State<QuizScreen> {
     if (_questions.isEmpty) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     final currentQ = _questions[_currentIndex];
     final cleanQ = _cleanQuestion(currentQ['question']);
-    final options = _getOptions(currentQ['question']);
+    final options = _getOptions(currentQ['question'], currentQ['answer']);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF3F0F6),
