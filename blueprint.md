@@ -1,46 +1,37 @@
 
-# Blueprint: Syntaxa Flutter App
+# Syntaxa Flutter App Blueprint
 
 ## Overview
 
-This document outlines the plan and progress for developing Syntaxa, a Flutter-based mobile application for learning English grammar. The app is inspired by the UI/UX of the web application at [https://github.com/Omar-webcloud/Syntaxa](https://github.com/Omar-webcloud/Syntaxa).
+This document outlines the plan and progress for creating a Flutter application named "Syntaxa," based on the provided UI screenshots. The app is an English learning platform with features like quizzes, a dictionary, practice exercises, rewards, and a user profile.
 
-## Current Plan
+## Style, Design, and Features
 
-### Phase 1: Foundational Setup & UI Mockups
+### Implemented
 
-The initial phase focuses on setting up the project structure, theming, and building the static UI for each of the five main screens.
+*   **Core Structure:**
+    *   Basic Flutter project setup.
+    *   Dependencies for `provider` (state management) and `google_fonts` (typography) have been added.
 
-**Steps:**
+### Current Plan
 
-1.  **Project Initialization:**
-    *   [x] Clear default boilerplate code.
-    *   [x] Create this `blueprint.md` file.
+*   **Navigation:** Implement a bottom navigation bar with five sections: Quiz, Dictionary, Practice, Rewards, and Profile.
+*   **Theming:**
+    *   Create a centralized theme management system using `provider`.
+    *   Implement both light and dark themes based on Material 3 principles.
+    *   Use `ColorScheme.fromSeed` for a consistent color palette.
+    *   Integrate custom fonts using the `google_fonts` package to match the design.
+*   **Screens:**
+    *   Create placeholder screens for each of the five navigation sections.
+    *   The initial focus will be on building the main layout and navigation structure.
 
-2.  **Dependency Management:**
-    *   [ ] Add `provider` for state management (especially for theme toggling).
-    *   [ ] Add `google_fonts` for custom typography to match the design.
-    *   [ ] Add `go_router` for navigation.
+## Plan for this Request
 
-3.  **Core App Structure:**
-    *   [ ] Implement a `ThemeProvider` to manage light and dark modes.
-    *   [ ] Set up the main `MaterialApp` with a custom `ThemeData`.
-    *   [ ] Create a home screen (`HomePage`) that contains the `BottomNavigationBar`.
-    *   [ ] Create placeholder widget files for each of the five main screens:
-        *   `quiz_screen.dart`
-        *   `dictionary_screen.dart`
-        *   `practice_screen.dart`
-        *   `rewards_screen.dart`
-        *   `profile_screen.dart`
-
-4.  **UI Implementation (Static):**
-    *   [ ] **Quiz Screen:** Build the UI for the daily quiz, including the progress bar, question card, and answer options.
-    *   [ ] **Dictionary Screen:** Build the UI for the dictionary, including the search bar and "Word of the Day" card.
-    *   [ ] **Practice Screen:** Build the UI for sentence practice and practice exercises.
-    *   [ ] **Rewards Screen:** Build the UI for displaying rewards, streaks, and achievements.
-    *   [ ] **Profile Screen:** Build the UI for the user profile and settings.
-
-## Style, Design, and Features (Completed)
-
-*This section will be updated as features are implemented.*
-
+1.  **Create `blueprint.md`:** Done.
+2.  **Add `cupertino_icons`:** Add the `cupertino_icons` dependency for icons.
+3.  **Create screen files:** Create the individual Dart files for each screen (Quiz, Dictionary, Practice, Rewards, Profile).
+4.  **Implement `main.dart`:**
+    *   Set up `ChangeNotifierProvider` for theme management (`ThemeProvider`).
+    *   Define `lightTheme` and `darkTheme` using `ThemeData` and `google_fonts`.
+    *   Create a `MainScreen` widget to hold the `Scaffold` with the `BottomNavigationBar`.
+    *   Implement the logic to switch between screens.
