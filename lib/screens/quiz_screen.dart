@@ -1,10 +1,100 @@
 import 'package:flutter/material.dart';
+import '../data/app_data.dart';
+import 'dart:math';
 
-class QuizScreen extends StatelessWidget {
+class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
 
   @override
+  State<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<QuizScreen> {
+  int _currentIndex = 0;
+  int _score = 0;
+  String? _selectedOption;
+  bool _isAnswerChecked = false;
+  List<Map<String, dynamic>> _questions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuestions();
+  }
+
+  void _loadQuestions() {
+    final allQuestions = List<Map<String, dynamic>>.from(AppData.data['multipleChoice']);
+    allQuestions.shuffle(Random());
+    setState(() {
+      _questions = allQuestions.take(10).toList();
+      _currentIndex = 0;
+      _score = 0;
+      _selectedOption = null;
+      _isAnswerChecked = false;
+    });
+  }
+
+  void _checkAnswer() {
+    if (_selectedOption == null) return;
+    setState(() {
+      _isAnswerChecked = true;
+      if (_selectedOption == _questions[_currentIndex]['answer']) {
+        _score++;
+      }
+    });
+  }
+
+  void _nextQuestion() {
+    setState(() {
+      if (_currentIndex < _questions.length - 1) {
+        _currentIndex++;
+        _selectedOption = null;
+        _isAnswerChecked = false;
+      } else {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            title: const Text('Quiz Completed!'),
+            content: Text('Your Score: $_score / ${_questions.length}', style: const TextStyle(fontSize: 20)),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _loadQuestions();
+                },
+                child: const Text('Restart Quiz'),
+              )
+            ],
+          )
+        );
+      }
+    });
+  }
+
+  List<String> _getOptions(String question) {
+    final regex = RegExp(r'\(([^)]+)\)');
+    final match = regex.firstMatch(question);
+    if (match != null) {
+      return match.group(1)!.split('/');
+    }
+    return ['yes', 'no'];
+  }
+
+  String _cleanQuestion(String question) {
+    final regex = RegExp(r'\s*\([^)]+\)');
+    String cleanStr = question.replaceAll(regex, '').trim();
+    if (!cleanStr.endsWith('.')) cleanStr += '.';
+    return cleanStr;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_questions.isEmpty) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final currentQ = _questions[_currentIndex];
+    final cleanQ = _cleanQuestion(currentQ['question']);
+    final options = _getOptions(currentQ['question']);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3F0F6),
       body: SafeArea(
@@ -19,106 +109,120 @@ class QuizScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('Question 1/10', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
-                  Text('0 Corrects', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
+                children: [
+                  Text('Question ${_currentIndex + 1}/${_questions.length}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
+                  Text('$_score Corrects', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
                 ],
               ),
               const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
-                  value: 0.1,
+                  value: (_currentIndex + 1) / _questions.length,
                   minHeight: 12,
-                  backgroundColor: Colors.orange.withOpacity(0.2),
+                  backgroundColor: Colors.orange.withValues(alpha: 0.2),
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
                 ),
               ),
               const SizedBox(height: 32),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(color: const Color(0xFFEBE4FF), borderRadius: BorderRadius.circular(20)),
-                          child: const Text('Fill In', style: TextStyle(color: Color(0xFF9C41BC), fontWeight: FontWeight.bold)),
-                        ),
                         Row(
-                          children: const [
-                            Text('Hint (-5) ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
-                            Icon(Icons.diamond, color: Colors.blue, size: 20),
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(color: const Color(0xFFEBE4FF), borderRadius: BorderRadius.circular(20)),
+                              child: const Text('Fill In', style: TextStyle(color: Color(0xFF9C41BC), fontWeight: FontWeight.bold)),
+                            ),
+                            Row(
+                              children: const [
+                                Text('Hint (-5) ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                                Icon(Icons.diamond, color: Colors.blue, size: 20),
+                              ],
+                            ),
                           ],
                         ),
+                        const SizedBox(height: 32),
+                        Text(cleanQ, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 32),
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: options.map((opt) {
+                            bool isSelected = _selectedOption == opt;
+                            bool isCorrectAnswer = opt == currentQ['answer'];
+                            Color bgColor = Colors.white;
+                            Color borderColor = Colors.grey.shade300;
+                            if (_isAnswerChecked) {
+                              if (isCorrectAnswer) {
+                                bgColor = Colors.green.shade100;
+                                borderColor = Colors.green;
+                              } else if (isSelected) {
+                                bgColor = Colors.red.shade100;
+                                borderColor = Colors.red;
+                              }
+                            } else if (isSelected) {
+                              bgColor = Colors.purple.shade50;
+                              borderColor = Colors.purple;
+                            }
+
+                            return GestureDetector(
+                              onTap: _isAnswerChecked ? null : () {
+                                setState(() {
+                                  _selectedOption = opt;
+                                });
+                              },
+                              child: Container(
+                                width: (MediaQuery.of(context).size.width - 48 - 48 - 16) / 2, // approximate dynamic width
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  color: bgColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: borderColor),
+                                ),
+                                child: Center(
+                                  child: Text(opt, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 32),
-                    const Text('He ___ a student.', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 32),
-                    Row(
-                      children: const [
-                        Expanded(child: _OptionButton('am')),
-                        SizedBox(width: 16),
-                        Expanded(child: _OptionButton('studies')),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: const [
-                        Expanded(child: _OptionButton('is')),
-                        SizedBox(width: 16),
-                        Expanded(child: _OptionButton('many')),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 32),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text('Check Answer', style: TextStyle(fontSize: 18, color: Colors.black54, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _isAnswerChecked ? _nextQuestion : (_selectedOption != null ? _checkAnswer : null),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  decoration: BoxDecoration(
+                    color: _selectedOption != null || _isAnswerChecked ? const Color(0xFF9C41BC) : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: Text(_isAnswerChecked ? 'Next Question' : 'Check Answer', style: TextStyle(fontSize: 18, color: (_selectedOption != null || _isAnswerChecked) ? Colors.white : Colors.black54, fontWeight: FontWeight.bold)),
+                  ),
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _OptionButton extends StatelessWidget {
-  final String text;
-  const _OptionButton(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Center(
-        child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       ),
     );
   }
