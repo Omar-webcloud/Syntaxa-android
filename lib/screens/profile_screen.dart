@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart'; // To access ThemeProvider for dark mode
 import '../data/app_data.dart';
+import 'privacy_policy_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -78,6 +79,29 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     _buildSettingRow('Sound Effects', false),
                     const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Privacy Policy', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Builder(
                       builder: (context) {
                         final themeProvider = Provider.of<ThemeProvider>(context);
@@ -93,7 +117,7 @@ class ProfileScreen extends StatelessWidget {
                               const Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
                               Switch(
                                 value: themeProvider.themeMode == ThemeMode.dark,
-                                activeColor: const Color(0xFF9C41BC),
+                                activeThumbColor: const Color(0xFF9C41BC),
                                 onChanged: (val) {
                                   themeProvider.toggleTheme();
                                 },
