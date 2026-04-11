@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart'; // To access ThemeProvider for dark mode
+import '../data/app_data.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -118,6 +119,15 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: const Center(
                   child: Text('Log Out', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red)),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                AppData.data['developer'],
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
               const SizedBox(height: 40),
