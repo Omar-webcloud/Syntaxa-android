@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../main.dart'; // To access ThemeProvider for dark mode
 import '../data/app_data.dart';
 import 'privacy_policy_screen.dart';
 
@@ -100,32 +98,6 @@ class ProfileScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Builder(
-                      builder: (context) {
-                        final themeProvider = Provider.of<ThemeProvider>(context);
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-                              Switch(
-                                value: themeProvider.themeMode == ThemeMode.dark,
-                                activeThumbColor: const Color(0xFF9C41BC),
-                                onChanged: (val) {
-                                  themeProvider.toggleTheme();
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      }
                     ),
                   ],
                 ),
