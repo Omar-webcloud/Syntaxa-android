@@ -67,6 +67,7 @@ flutter_native_splash:
   android: true
   ios: false
   web: true
+  branding: "lib/optech.png"
 
 
 # For information on the generic Dart part of this file, see the
@@ -84,6 +85,7 @@ flutter:
   assets:
     - lib/logo-syntaxa.png
     - lib/icon.png
+    - lib/optech.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
