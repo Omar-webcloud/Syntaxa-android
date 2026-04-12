@@ -1,6 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'data/auth_provider.dart';
 
 import 'screens/dictionary_screen.dart';
 import 'screens/practice_screen.dart';
@@ -9,7 +10,12 @@ import 'screens/quiz_screen.dart';
 import 'screens/rewards_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

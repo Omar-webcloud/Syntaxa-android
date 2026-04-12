@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../data/auth_provider.dart';
 
 class RewardsScreen extends StatelessWidget {
   const RewardsScreen({super.key});
@@ -17,12 +19,26 @@ class RewardsScreen extends StatelessWidget {
               const SizedBox(height: 4),
               const Text('Keep Your Streak Alive to Earn More', style: TextStyle(fontSize: 16, color: Colors.black54, fontWeight: FontWeight.w600)),
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(child: _buildStatCard(const Icon(Icons.diamond, color: Colors.blue, size: 28), '124', 'Total Gems')),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard(const Icon(Icons.local_fire_department, color: Colors.orange, size: 28), '5', 'Day Streak')),
-                ],
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return Row(
+                    children: [
+                      Expanded(
+                          child: _buildStatCard(
+                              const Icon(Icons.diamond,
+                                  color: Colors.blue, size: 28),
+                              auth.isLoggedIn ? auth.totalGems.toString() : '0',
+                              'Total Gems')),
+                      const SizedBox(width: 16),
+                      Expanded(
+                          child: _buildStatCard(
+                              const Icon(Icons.local_fire_department,
+                                  color: Colors.orange, size: 28),
+                              auth.isLoggedIn ? auth.totalStreak.toString() : '0',
+                              'Day Streak')),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 24),
               Container(
@@ -80,12 +96,45 @@ class RewardsScreen extends StatelessWidget {
                   Text('View All', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
                 ],
               ),
-              const SizedBox(height: 16),
-              _buildAchievementCard(Icons.library_books, Colors.purple, 'Grammar Master', 'Completed 10 basic grammar practices.', 1.0, isCompleted: true),
-              const SizedBox(height: 16),
-              _buildAchievementCard(Icons.local_fire_department, Colors.orange, '7 Day Streak', 'Maintain a week-long learning habit to unlock.', 5/7, progressText: '5/7'),
-              const SizedBox(height: 16),
-              _buildAchievementCard(Icons.menu_book, Colors.blue, '100 Lesson Club', 'Finish 100 lessons in total to unlock.', 0.0, isLocked: true),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  double streakProgress = (auth.isLoggedIn ? auth.totalStreak : 0) / 7;
+                  if (streakProgress > 1.0) streakProgress = 1.0;
+
+                  double lessonProgress = (auth.isLoggedIn ? auth.totalPracticed : 0) / 100;
+                  if (lessonProgress > 1.0) lessonProgress = 1.0;
+
+                  return Column(
+                    children: [
+                      _buildAchievementCard(
+                          Icons.library_books,
+                          Colors.purple,
+                          'Grammar Master',
+                          'Completed 10 basic grammar practices.',
+                          (auth.isLoggedIn && auth.totalQuiz >= 10) ? 1.0 : (auth.totalQuiz / 10),
+                          isCompleted: auth.isLoggedIn && auth.totalQuiz >= 10),
+                      const SizedBox(height: 16),
+                      _buildAchievementCard(
+                          Icons.local_fire_department,
+                          Colors.orange,
+                          '7 Day Streak',
+                          'Maintain a week-long learning habit to unlock.',
+                          streakProgress,
+                          progressText: '${(streakProgress * 7).toInt()}/7',
+                          isCompleted: streakProgress >= 1.0),
+                      const SizedBox(height: 16),
+                      _buildAchievementCard(
+                          Icons.menu_book,
+                          Colors.blue,
+                          '100 Lesson Club',
+                          'Finish 100 lessons in total to unlock.',
+                          lessonProgress,
+                          isLocked: lessonProgress < 0.1,
+                          isCompleted: lessonProgress >= 1.0),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         ),

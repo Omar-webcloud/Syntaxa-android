@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../data/auth_provider.dart';
 import '../data/app_data.dart';
+import 'login_screen.dart';
+import 'signup_screen.dart';
 import 'dart:math';
 
 class QuizScreen extends StatefulWidget {
@@ -51,6 +55,12 @@ class _QuizScreenState extends State<QuizScreen> {
         _selectedOption = null;
         _isAnswerChecked = false;
       } else {
+        // Update stats
+        final auth = Provider.of<AuthProvider>(context, listen: false);
+        if (auth.isLoggedIn) {
+          auth.addQuizResult(_score, _questions.length);
+        }
+        
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -127,9 +137,90 @@ class _QuizScreenState extends State<QuizScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Welcome Back Abul Hayat!', style: TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
-              Text('Your Daily Quiz', style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32, color: Colors.black)),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  if (auth.isLoggedIn) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Welcome Back ${auth.username}!',
+                            style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                      ],
+                    );
+                  } else {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Welcome to Syntaxa!',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w600)),
+                            Row(
+                              children: [
+                                OutlinedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const SignUpScreen()));
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(
+                                        color: Color(0xFF9C41BC)),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8)),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 0),
+                                  ),
+                                  child: const Text('Sign Up',
+                                      style: TextStyle(
+                                          color: Color(0xFF9C41BC),
+                                          fontSize: 14)),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const LoginScreen()));
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF9C41BC),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8)),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 0),
+                                  ),
+                                  child: const Text('Log In',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 14)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    );
+                  }
+                },
+              ),
+              Text('Your Daily Quiz',
+                  style: Theme.of(context)
+                      .textTheme
+                      .displayLarge
+                      ?.copyWith(fontSize: 32, color: Colors.black)),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

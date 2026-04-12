@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../data/auth_provider.dart';
 import '../data/app_data.dart';
 import 'lesson_screen.dart';
 import 'dart:math';
@@ -65,6 +67,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
         // Fallback if missing word logic fails
         _isCorrect = sanitize(userInput) == sanitize(fullAnswerStr);
       }
+      
+      // Update stats
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.isLoggedIn) {
+        auth.addPracticeResult(_isCorrect);
+      }
     });
   }
 
@@ -96,12 +104,22 @@ class _PracticeScreenState extends State<PracticeScreen> {
               const SizedBox(height: 4),
               const Text('Improve Your Writing with Interactive Exercise.', style: TextStyle(fontSize: 16, color: Colors.black54, fontWeight: FontWeight.w600)),
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(child: _buildStatCard('📘 7 Lesson', 'TOTAL PRACTICED')),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('📊 43%', 'AVERAGE ACCURACY')),
-                ],
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return Row(
+                    children: [
+                      Expanded(
+                          child: _buildStatCard(
+                              '📘 ${auth.isLoggedIn ? auth.totalPracticed : 0} Lesson',
+                              'TOTAL PRACTICED')),
+                      const SizedBox(width: 16),
+                      Expanded(
+                          child: _buildStatCard(
+                              '📊 ${auth.isLoggedIn ? auth.accuracy : 0}%',
+                              'AVERAGE ACCURACY')),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 24),
               if (_currentQuestion != null)

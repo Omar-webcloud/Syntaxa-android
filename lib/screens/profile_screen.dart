@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../data/auth_provider.dart';
 import '../data/app_data.dart';
 import 'privacy_policy_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -42,22 +45,33 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('Abul Hayat', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return Text(
+                    auth.isLoggedIn ? auth.username! : 'Guest',
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  );
+                },
+              ),
               const SizedBox(height: 32),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                clipBehavior: Clip.none,
-                child: Row(
-                  children: [
-                    _buildTopStatCard(Icons.track_changes, Colors.purple, 'Total Quiz', '46'),
-                    const SizedBox(width: 12),
-                    _buildTopStatCard(Icons.local_fire_department, Colors.orange, 'Total Streak', '5 Days'),
-                    const SizedBox(width: 12),
-                    _buildTopStatCard(Icons.emoji_events, Colors.blue, 'Total Gem', '124'),
-                    const SizedBox(width: 12),
-                    _buildTopStatCard(Icons.schedule, Colors.lightBlue, 'Time Spent', '6h 9m'),
-                  ],
-                ),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
+                    child: Row(
+                      children: [
+                        _buildTopStatCard(Icons.track_changes, Colors.purple, 'Total Quiz', '${auth.isLoggedIn ? auth.totalQuiz : 0}'),
+                        const SizedBox(width: 12),
+                        _buildTopStatCard(Icons.local_fire_department, Colors.orange, 'Total Streak', '${auth.isLoggedIn ? auth.totalStreak : 0} Days'),
+                        const SizedBox(width: 12),
+                        _buildTopStatCard(Icons.emoji_events, Colors.blue, 'Total Gem', '${auth.isLoggedIn ? auth.totalGems : 0}'),
+                        const SizedBox(width: 12),
+                        _buildTopStatCard(Icons.schedule, Colors.lightBlue, 'Accuracy', '${auth.isLoggedIn ? auth.accuracy : 0}%'),
+                      ],
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 32),
               const Align(
@@ -102,20 +116,45 @@ class ProfileScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
-                  ],
-                ),
-                child: const Center(
-                  child: Text('Log Out', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red)),
-                ),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return GestureDetector(
+                    onTap: () {
+                      if (auth.isLoggedIn) {
+                        auth.logout();
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        );
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5)),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          auth.isLoggedIn ? 'Log Out' : 'Sign In',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: auth.isLoggedIn ? Colors.red : const Color(0xFF9C41BC),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 24),
               Text(
